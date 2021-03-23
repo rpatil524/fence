@@ -1636,7 +1636,7 @@ future = [
     {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
 ]
 gen3authz = [
-    {file = "gen3authz-1.0.5.tar.gz", hash = "sha256:291a29e054b6e778f214a105910f8f40eddfb09934e18d4fef5d406119c217ac"},
+    {file = "gen3authz-1.0.5.tar.gz", hash = "sha256:2aedccb14ff6be049d410a41d469743274caa1b243a196fbe7c5af5bec822ad7"},
 ]
 gen3cirrus = [
     {file = "gen3cirrus-1.3.0.tar.gz", hash = "sha256:e73c9a77d2e98adee066e6547af6c2a7d49bf5d44d11eaca7fbb6549184e9635"},
