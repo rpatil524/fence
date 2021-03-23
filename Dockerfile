@@ -57,6 +57,8 @@ WORKDIR /$appname
 # cache so that poetry install will run if these files change
 COPY poetry.lock pyproject.toml /$appname/
 
+RUN pip install --upgrade pip
+
 # install Fence and dependencies via poetry
 RUN source $HOME/.poetry/env \
     && poetry config virtualenvs.create false \
