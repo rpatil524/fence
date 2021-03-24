@@ -59,17 +59,20 @@ COPY poetry.lock pyproject.toml /$appname/
 
 RUN pip install --upgrade pip
 
+RUN git clone -q https://github.com/uc-cdis/gen3authz.git \
+    && cd gen3authz/ \
+    && git checkout feat/bulk_policy_endpoint\
+    && cd python/ \
+    && source $HOME/.poetry/env \
+    && poetry config virtualenvs.create false \
+    && poetry install -vv --no-dev --no-interaction \
+    && poetry show -v
+
 # install Fence and dependencies via poetry
 RUN source $HOME/.poetry/env \
     && poetry config virtualenvs.create false \
     && poetry install -vv --no-dev --no-interaction \
     && poetry show -v
-
-RUN git clone -q https://github.com/uc-cdis/gen3authz.git \
-    && cd gen3authz/python \
-    && git checkout feat/bulk_policy_endpoint \
-    && source #Home/.poetry/env \
-    && poetry install
 
 RUN COMMIT=`git rev-parse HEAD` && echo "COMMIT=\"${COMMIT}\"" >$appname/version_data.py \
     && VERSION=`git describe --always --tags` && echo "VERSION=\"${VERSION}\"" >>$appname/version_data.py
