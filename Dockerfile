@@ -68,6 +68,7 @@ RUN source $HOME/.poetry/env \
 RUN git clone -q https://github.com/uc-cdis/gen3authz.git \
     && cd gen3authz/python \
     && git checkout feat/bulk_policy_endpoint \
+    && source #Home/.poetry/env \
     && poetry install
 
 RUN COMMIT=`git rev-parse HEAD` && echo "COMMIT=\"${COMMIT}\"" >$appname/version_data.py \
