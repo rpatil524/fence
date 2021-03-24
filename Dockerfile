@@ -47,8 +47,7 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     && /bin/rm -rf awscliv2.zip ./aws
 
 # install poetry
-# RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-RUN pip install poetry==1.0.9
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 
 COPY . /$appname
 COPY ./deployment/uwsgi/uwsgi.ini /etc/uwsgi/uwsgi.ini
@@ -65,6 +64,11 @@ RUN source $HOME/.poetry/env \
     && poetry config virtualenvs.create false \
     && poetry install -vv --no-dev --no-interaction \
     && poetry show -v
+
+RUN git clone -q https://github.com/uc-cdis/gen3authz.git \
+    && git checkout feat/bulk_policy_endpoint \
+    && cd gen3authz/python \
+    && poetry install
 
 RUN COMMIT=`git rev-parse HEAD` && echo "COMMIT=\"${COMMIT}\"" >$appname/version_data.py \
     && VERSION=`git describe --always --tags` && echo "VERSION=\"${VERSION}\"" >>$appname/version_data.py
