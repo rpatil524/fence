@@ -11,6 +11,8 @@ RUN apk update \
     && apk add curl bash git vim make lftp \
     && apk update && apk add openssh && apk add libmcrypt-dev
 
+ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
+
 RUN mkdir -p /var/www/$appname \
     && mkdir -p /var/www/.cache/Python-Eggs/ \
     && mkdir /run/nginx/ \
@@ -40,6 +42,8 @@ RUN (cd /tmp \
   && /bin/rm -rf /tmp/*)
 EXPOSE 80
 
+RUN pip install --upgrade pip
+
 # aws cli v2 - needed for storing files in s3 during usersync k8s job
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
     && unzip awscliv2.zip \
@@ -47,7 +51,7 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     && /bin/rm -rf awscliv2.zip ./aws
 
 # install poetry
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | POETRY_VERSION=1.0.9 python
 
 COPY . /$appname
 COPY ./deployment/uwsgi/uwsgi.ini /etc/uwsgi/uwsgi.ini
