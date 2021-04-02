@@ -4,10 +4,11 @@ import os
 from flask_sqlalchemy_session import current_session
 import urllib.request, urllib.parse, urllib.error
 
+from cdislogging import get_logger
+from gen3authz.client.arborist.client import ArboristClient
+
 from fence.models import GA4GHVisaV1, IdentityProvider
-
 from fence.blueprints.login.base import DefaultOAuth2Login, DefaultOAuth2Callback
-
 from fence.config import config
 from fence.scripting.fence_create import init_syncer
 from fence.utils import get_valid_expiration
@@ -94,6 +95,12 @@ class RASCallback(DefaultOAuth2Callback):
             # not closing leads to partially updated records
             current_session.close()
             DB = os.environ.get("FENCE_DB") or config.get("DB")
+            arborist = ArboristClient(
+                arborist_base_url=config["ARBORIST"],
+                logger=get_logger("user_syncer.arborist_client"),
+                authz_provider="user-sync",
+            )
+
             if DB is None:
                 try:
                     from fence.settings import DB
@@ -107,5 +114,6 @@ class RASCallback(DefaultOAuth2Callback):
                 dbGaP,
                 None,
                 DB,
+                arborist=arborist,
             )
             sync.sync_single_user_visas(user, current_session)
