@@ -929,7 +929,7 @@ class UserSyncer(object):
             u.is_admin = user_info[username].get("admin", False)
 
             # do not update if there is no tag
-            if user_info[username]["tags"] == {}:
+            if not user_info[username].get("tags"):
                 continue
 
             # remove user db tags if they are not shown in new tags
@@ -1516,13 +1516,18 @@ class UserSyncer(object):
         # update policies
         policies = user_yaml.authz.get("policies", [])
         for policy in policies:
-            policy_id = policy.pop("id")
+            # policy_id = policy.pop("id")
+            policy_id = policy.get("id")
             try:
                 self.logger.debug(
                     "Trying to upsert policy with id {}".format(policy_id)
                 )
+                print("------------------------------------------------------")
+                print(self.arborist_client.update_bulk_policy(
+                    policy, create_if_not_exist=True,
+                ))
                 response = self.arborist_client.update_bulk_policy(
-                    policy_id, policy, create_if_not_exist=True
+                    policy, create_if_not_exist=True
                 )
             except ArboristError as e:
                 self.logger.error(e)
@@ -1695,8 +1700,8 @@ class UserSyncer(object):
                         if policy_id not in self._created_policies:
                             try:
                                 self.arborist_client.update_bulk_policy(
-                                    policy_id,
                                     {
+                                        "id": policy_id,
                                         "description": "policy created by fence sync",
                                         "role_ids": [permission],
                                         "resource_paths": [path],
@@ -2132,16 +2137,3 @@ class UserSyncer(object):
             self.sync_to_db_and_storage_backend(user_projects, user_info, sess, True)
         else:
             self.logger.info("No users for syncing")
-
-        # update arborist db (user access)
-        if self.arborist_client:
-            self.logger.info("Synchronizing arborist with authorization info...")
-            success = self._update_authz_in_arborist(sess, user_projects, user_yaml)
-            if success:
-                self.logger.info(
-                    "Finished synchronizing authorization info to arborist"
-                )
-            else:
-                self.logger.error(
-                    "Could not synchronize authorization info successfully to arborist"
-                )
