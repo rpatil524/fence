@@ -2134,6 +2134,22 @@ class UserSyncer(object):
         else:
             self.logger.info("No users for syncing")
 
+        # update the Arborist DB (resources, roles, policies, groups)
+        if user_yaml.authz:
+            if not self.arborist_client:
+                raise EnvironmentError(
+                    "yaml file contains authz section but sync is not configured with"
+                    " arborist client--did you run sync with --arborist <arborist client> arg?"
+                )
+            self.logger.info("Synchronizing arborist...")
+            success = self._update_arborist(sess, user_yaml)
+            if success:
+                self.logger.info("Finished synchronizing arborist")
+            else:
+                self.logger.error("Could not synchronize successfully")
+        else:
+            self.logger.info("No `authz` section; skipping arborist sync")
+
         # update arborist db (user access)
         if self.arborist_client:
             self.logger.info("Synchronizing arborist with authorization info...")
@@ -2146,3 +2162,5 @@ class UserSyncer(object):
                 self.logger.error(
                     "Could not synchronize authorization info successfully to arborist"
                 )
+        else:
+            self.logger.info("Arborist client not available.")
