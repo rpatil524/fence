@@ -1515,23 +1515,35 @@ class UserSyncer(object):
 
         # update policies
         policies = user_yaml.authz.get("policies", [])
-        for policy in policies:
-            # policy_id = policy.pop("id")
-            policy_id = policy.get("id")
-            try:
-                self.logger.debug(
-                    "Trying to upsert policy with id {}".format(policy_id)
+        # for policy in policies:
+        #     # policy_id = policy.pop("id")
+        #     policy_id = policy.get("id")
+        #     try:
+        #         self.logger.debug(
+        #             "Trying to upsert policy with id {}".format(policy_id)
+        #         )
+        #         response = self.arborist_client.update_bulk_policy(
+        #             policy, create_if_not_exist=True
+        #         )
+        #     except ArboristError as e:
+        #         self.logger.error(e)
+        #         # keep going; maybe just some conflicts from things existing already
+        #     else:
+        #         if response:
+        #             self.logger.debug("Upserted policy with id {}".format(policy_id))
+        #             self._created_policies.add(policy_id)
+
+        try:
+            self.logger.debug(
+                "Upsert bulk policies {}".format(policies)
                 )
-                response = self.arborist_client.update_bulk_policy(
-                    policy, create_if_not_exist=True
-                )
-            except ArboristError as e:
-                self.logger.error(e)
-                # keep going; maybe just some conflicts from things existing already
-            else:
-                if response:
-                    self.logger.debug("Upserted policy with id {}".format(policy_id))
-                    self._created_policies.add(policy_id)
+            response = self.arborist_client.update_bulk_policy(
+                policies, create_if_not_exist=True
+            )
+        except ArboristError as e:
+            self.logger.error(e)
+        
+        # Else add 
 
         # update groups
         groups = user_yaml.authz.get("groups", [])
@@ -1684,7 +1696,7 @@ class UserSyncer(object):
                                 )
                             )
                         self._created_roles.add(permission)
-
+                    pcs = []
                     for path in paths:
                         # If everything was created fine, grant a policy to
                         # this user which contains exactly just this resource,
@@ -1694,24 +1706,30 @@ class UserSyncer(object):
                         # so the policy id will be something like 'x.y.z-create'
                         policy_id = _format_policy_id(path, permission)
                         if policy_id not in self._created_policies:
-                            try:
-                                self.arborist_client.update_bulk_policy(
-                                    {
-                                        "id": policy_id,
-                                        "description": "policy created by fence sync",
-                                        "role_ids": [permission],
-                                        "resource_paths": [path],
-                                    },
-                                    create_if_not_exist=True,
-                                )
-                            except ArboristError as e:
-                                self.logger.info(
-                                    "not creating policy in arborist; {}".format(str(e))
-                                )
-                            self._created_policies.add(policy_id)
+                            # try:
+                            pcs.append({
+                                "id": policy_id,
+                                "description": "policy created by fence sync",
+                                "role_ids": [permission],
+                                "resource_paths": [path]
+                            })
+                                # self.arborist_client.update_bulk_policy(
+                                #     {
+                                #         "id": policy_id,
+                                #         "description": "policy created by fence sync",
+                                #         "role_ids": [permission],
+                                #         "resource_paths": [path],
+                                #     },
+                                #     create_if_not_exist=True,
+                                # )
+                            # except ArboristError as e:
+                            #     self.logger.info(
+                            #         "not creating policy in arborist; {}".format(str(e))
+                            #     )
+                        #     self._created_policies.add(policy_id)
 
-                        self.arborist_client.grant_user_policy(username, policy_id)
-
+                        # self.arborist_client.grant_user_policy(username, policy_id)
+                    self.arborist_client.update_bulk_policy(pcs, create_if_not_exist=True)
             if user_yaml:
                 for policy in user_yaml.policies.get(username, []):
                     self.arborist_client.grant_user_policy(username, policy)
