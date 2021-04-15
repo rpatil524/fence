@@ -362,7 +362,7 @@ def test_login_log_login_endpoint(
             "id_token": jwt_string,
         }
 
-    if idp in ["google", "microsoft", "synapse", "cognito"]:
+    if idp in ["google", "microsoft", "okta", "synapse", "cognito"]:
         get_user_id_value["email"] = username
 
     get_user_id_patch = None
