@@ -13,7 +13,6 @@ from fence.blueprints.data.indexd import S3IndexedFileLocation
 from fence.blueprints.login.utils import allowed_login_redirects, domain
 from fence.errors import UserError
 from fence.jwt import keys
-from fence.models import migrate
 from fence.oidc.client import query_client
 from fence.oidc.server import server
 from fence.resources.audit_service_client import AuditServiceClient
@@ -91,16 +90,6 @@ def app_init(
 def app_sessions(app):
     app.url_map.strict_slashes = False
     app.db = SQLAlchemyDriver(config["DB"])
-
-    # TODO: we will make a more robust migration system external from the application
-    #       initialization soon
-    if config["ENABLE_DB_MIGRATION"]:
-        logger.info("Running database migration...")
-        migrate(app.db)
-        logger.info("Done running database migration.")
-    else:
-        logger.info("NOT running database migration.")
-
     session = flask_scoped_session(app.db.Session, app)  # noqa
     app.session_interface = UserSessionInterface()
 

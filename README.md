@@ -100,6 +100,7 @@ At the moment, supported IDPs include:
   - InCommon
   - eduGAIN
 - CILogon
+- Okta
 - Cognito
 - Synapse
 - Microsoft
