@@ -1095,7 +1095,6 @@ def test_assume_role_time_limit(
 
     # Mocking STS client assume role
     duration_in_function = 0
-    mocked_sts_client = MagicMock()
 
     def mock_sts_client_assume_role(RoleArn, DurationSeconds, RoleSessionName=None):
         nonlocal duration_in_function
@@ -1110,8 +1109,11 @@ def test_assume_role_time_limit(
             "AssumedRoleUser": {"AssumedRoleId": "", "Arn": RoleArn},
         }
 
-    mocked_sts_client.assume_role = mock_sts_client_assume_role
-    mocked_sts_client.return_value = mocked_sts_client
+    mocked_assume_role_function = MagicMock()
+    mocked_assume_role_function.assume_role = mock_sts_client_assume_role
+
+    mocked_sts_client = MagicMock()
+    mocked_sts_client.return_value = mocked_assume_role_function
     assume_role_patcher = patch(
         "fence.resources.aws.boto_manager.client", mocked_sts_client
     )
