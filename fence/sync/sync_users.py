@@ -1631,6 +1631,15 @@ class UserSyncer(object):
             try:
                 arborist_users = self.arborist_client.get_users().json["users"]
 
+                # Fence has authz provider that's more granular:
+                #   https://github.com/uc-cdis/cloud-automation/blob/master/doc/gen3-sql-queries.md#get-all-user-access-by-username-and-projectauth_id-include-authorization-source-name
+                # Arborist's "usr_policy.authz_provider" is `user-sync`
+                # See https://github.com/uc-cdis/arborist/tree/feat/authz_provider_users for a PR to expose authz_provider to Fence
+
+                # TODO: maybe only wipe policies that are created by usersync? i.e. Arborist may have "GA4GH" policies for the same
+                #       same user, but we should leave those be (assume they have expirations on them). Usersync should only mess
+                #       with policies it grants
+
                 # construct user information, NOTE the lowering of the username. when adding/
                 # removing access, the case in the Fence db is used. For combining access, it is
                 # case-insensitive, so we lower
