@@ -368,11 +368,14 @@ class IndexedFile(object):
         r_pays_project=None,
         file_name=None,
     ):
+        print("THIS IS GETTING THE URL NOW")
+        print(self.index_document.get("authz"))
         if self.index_document.get("authz"):
             action_to_permission = {
                 "upload": "write-storage",
                 "download": "read-storage",
             }
+            print("WE'RE CHECKING THE AUTHZ NOW")
             if not self.check_authz(action_to_permission[action]):
                 raise Unauthorized(
                     f"Either you weren't logged in or you don't have "
@@ -453,6 +456,7 @@ class IndexedFile(object):
         if not self.index_document.get("authz"):
             raise ValueError("index record missing `authz`")
 
+        print("IN CHECKING AUTHZ FUNCTION!!!!!!!!")
         logger.debug(
             f"authz check can user {action} on {self.index_document['authz']} for fence?"
         )
