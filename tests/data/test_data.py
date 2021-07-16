@@ -45,7 +45,7 @@ INDEXD_RECORD_WITH_PUBLIC_AUTHZ_AND_ACL_POPULATED = {
     "hashes": {},
     "metadata": {},
     "authz": ["/open"],
-    "acl": ["*"],
+    "acl": [],
     "form": "",
     "created_date": "",
     "updated_date": "",

@@ -1,6 +1,6 @@
 # Usersync
 
-Usersync is a script that parses user access information from multiple sources (user.yaml files, dbGaP user authorization "telemetry" files AKA whitelists) and keeps users' access to Gen3 resources up to date by updating the Fence and Arborist databases.
+Usersync is a script that parses user access information from multiple sources (user.yaml files, dbGaP user authorization "telemetry" files AKA whitelists, GA4GH Visas) and keeps users' access to Gen3 resources up to date by updating the Fence and Arborist databases.
 
 
 
@@ -8,7 +8,7 @@ Usersync is a script that parses user access information from multiple sources (
 
 ![Usersync Flow](images/usersync.png)
 
-> The access from the user.yaml file and the dbGaP authorization files is combined (see example below), but the user.yaml file overrides the user information (such as email) obtained from the dbGaP authorization files.
+> The access from the user.yaml file and the dbGaP authorization files or GA4GH visas is combined (see example below), but the user.yaml file overrides the user information (such as email) obtained from the dbGaP authorization files. Access information is retrieved from visas if valid RAS GA4GH Visas are available, else, depending on the configuration, information from dbGaP authorization files is used. Visas will always take priority before any other source of authorization. 
 
 ## Configuration
 
@@ -35,6 +35,12 @@ dbGaP:
 ```
 
 An example can be found in the config used for unit testing [tests/test-fence-config.yaml](https://github.com/uc-cdis/fence/blob/master/tests/test-fence-config.yaml)
+
+To configure usersync to use GA4GH Visas, fence-config.yaml should specify to use Visas and a list of allowed GA4GH Visa types. Example of this can be found [here](https://github.com/uc-cdis/fence/blob/4.14.0/fence/config-default.yaml#L853-L858)
+You can further configure `fallback_to_dbgap_sftp`, when turned on, will fallback to use telemetry files as a source of authorization information. A user will fallback to telemetry files in the following conditions:
+- User's visa expired.
+- User has an invalid/malformed visa.
+- Usersync wasn't able to retrieve visas for the user.
 
 ### Enable dbGaP backup to s3:
 Add below to manifest.json to global block to copy dbGaP authorization files to <dbgap_backup_bucket>:
