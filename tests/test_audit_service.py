@@ -81,8 +81,9 @@ def test_disabled_audit(
             key=rsa_private_key,
             headers={"kid": kid},
             algorithm="RS256",
-        ).decode("utf-8")
+        )
     }
+    print(headers)
 
     audit_decorator_mocker = mock.patch(
         "fence.resources.audit.utils.create_audit_log_for_request",
@@ -150,7 +151,7 @@ def test_presigned_url_log(
             key=rsa_private_key,
             headers={"kid": kid},
             algorithm="RS256",
-        ).decode("utf-8")
+        )
     }
 
     # protocol=None should fall back to s3 (first indexed location):
@@ -217,7 +218,7 @@ def test_presigned_url_log_acl(
             key=rsa_private_key,
             headers={"kid": kid},
             algorithm="RS256",
-        ).decode("utf-8")
+        )
     }
 
     with audit_service_mocker as audit_service_requests:
@@ -321,7 +322,7 @@ def test_presigned_url_log_disabled(
             key=rsa_private_key,
             headers={"kid": kid},
             algorithm="RS256",
-        ).decode("utf-8")
+        )
     }
 
     # protocol=None should fall back to s3 (first indexed location):
@@ -564,7 +565,7 @@ def test_presigned_url_log_push_to_sqs(
             key=rsa_private_key,
             headers={"kid": kid},
             algorithm="RS256",
-        ).decode("utf-8")
+        )
     }
     response = client.get(path, headers=headers)
     assert response.status_code == 200, response

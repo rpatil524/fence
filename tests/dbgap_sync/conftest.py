@@ -284,7 +284,7 @@ def add_visa_manually(db_session, user, rsa_private_key, kid):
 
     encoded_visa = jwt.encode(
         decoded_visa, key=rsa_private_key, headers=headers, algorithm="RS256"
-    ).decode("utf-8")
+    )
 
     expires = int(decoded_visa["exp"])
     if user.username == "expired_visa_user":

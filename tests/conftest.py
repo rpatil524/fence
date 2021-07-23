@@ -79,7 +79,7 @@ def encoded_jwt(kid, rsa_private_key):
     headers = {"kid": kid}
     return jwt.encode(
         utils.default_claims(), key=rsa_private_key, headers=headers, algorithm="RS256"
-    ).decode("utf-8")
+    )
 
 
 @pytest.fixture(scope="session")
@@ -98,7 +98,7 @@ def encoded_jwt_expired(kid, rsa_private_key):
     claims_expired["iat"] -= 10000
     return jwt.encode(
         claims_expired, key=rsa_private_key, headers=headers, algorithm="RS256"
-    ).decode("utf-8")
+    )
 
 
 @pytest.fixture(scope="session")
@@ -115,7 +115,7 @@ def encoded_jwt_refresh_token(claims_refresh, kid, rsa_private_key):
     headers = {"kid": kid}
     return jwt.encode(
         claims_refresh, key=rsa_private_key, headers=headers, algorithm="RS256"
-    ).decode("utf-8")
+    )
 
 
 class Mocker(object):
@@ -1225,7 +1225,7 @@ def encoded_creds_jwt(
             key=rsa_private_key,
             headers=headers,
             algorithm="RS256",
-        ).decode("utf-8"),
+        ),
         user_id=user_client["user_id"],
         client_id=oauth_client["client_id"],
         proxy_group_id=google_proxy_group["id"],
@@ -1255,7 +1255,7 @@ def encoded_jwt_no_proxy_group(kid, rsa_private_key, user_client, oauth_client):
             key=rsa_private_key,
             headers=headers,
             algorithm="RS256",
-        ).decode("utf-8"),
+        ),
         user_id=user_client["user_id"],
         client_id=oauth_client["client_id"],
     )

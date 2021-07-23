@@ -51,6 +51,7 @@ storageclient = {git = "https://github.com/uc-cdis/storage-client", rev = "1.0.2
 userdatamodel = "^2.3.3"
 werkzeug = "^2.0.0"
 pyOpenSSL = "^20.0.1"
+cachelib = "^0.2.0"
 
 [tool.poetry.dev-dependencies]
 addict = "^2.2.1"
@@ -61,7 +62,7 @@ mock = "^2.0.0"
 moto = "^1.1.24"
 pytest = "^3.2.3"
 pytest-cov = "^2.5.1"
-pytest-flask = "^0.11.0"
+pytest-flask = "^0.15.1"
 
 [tool.poetry.scripts]
 fence-create = 'bin.fence_create:main'

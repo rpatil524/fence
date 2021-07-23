@@ -564,7 +564,9 @@ def _get_proxy_group_id():
     Returnns:
         int: id of proxy group associated with user
     """
+    print("+++++++++++++++++++++++++++++++++++++++++++++++++++")
     proxy_group_id = get_users_proxy_group_from_token()
+    print(proxy_group_id)
 
     if not proxy_group_id:
         user = (
