@@ -21,7 +21,7 @@ from fence.config import config
 from fence.errors import NotFound, Unauthorized, UserError, InternalError
 from fence.jwt.utils import get_jwt_header
 from fence.models import query_for_user
-
+from fence.resources.openid
 
 logger = get_logger(__name__)
 
@@ -157,6 +157,11 @@ def get_user_info(current_session, username):
         if "ga4gh_passport_v1" in at_scopes:
             encoded_visas = [row.ga4gh_visa for row in user.ga4gh_visas_v1]
             info["ga4gh_passport_v1"] = encoded_visas
+
+    client = flask.current_app.ras_client
+    passport = client.get_passport(user, current_session)
+
+    info["passport_v1"] = passport
 
     return info
 

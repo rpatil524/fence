@@ -288,3 +288,17 @@ class RASOauth2Client(Oauth2ClientBase):
             current_db_session = db_session.object_session(visa)
             current_db_session.add(visa)
             db_session.commit()
+
+    def get_passport(self, user, db_session=current_session):
+        # get refresh_token from db
+        token_endpoint = self.get_value_from_discovery_doc("token_endpoint", "")
+        userinfo_endpoint = self.get_value_from_discovery_doc(
+            "userinfo_endpoint", ""
+        )
+        token = self.get_access_token(user, token_endpoint, db_session)
+        userinfo = self.get_userinfo(token, userinfo_endpoint)
+        encoded_visas = userinfo.get("ga4gh_passport_v1", [])
+
+        return encoded_visas
+
+
