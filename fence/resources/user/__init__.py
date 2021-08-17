@@ -21,7 +21,7 @@ from fence.config import config
 from fence.errors import NotFound, Unauthorized, UserError, InternalError
 from fence.jwt.utils import get_jwt_header
 from fence.models import query_for_user
-from fence.resources.openid
+# from fence.resources.openid
 
 logger = get_logger(__name__)
 
