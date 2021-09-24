@@ -90,6 +90,7 @@ class RASOauth2Client(Oauth2ClientBase):
         decoded_passport = {}
         encoded_passport = userinfo.get("passport_jwt_v11")
         passport_issuer, passport_kid = None, None
+        print(f"encoded_passport: {encoded_passport}")
 
         if not pkey_cache:
             pkey_cache = {}
