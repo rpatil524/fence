@@ -89,6 +89,7 @@ class RASOauth2Client(Oauth2ClientBase):
         """
         decoded_passport = {}
         encoded_passport = userinfo.get("passport_jwt_v11")
+        flask.session["ga4gh_passport"] = encoded_passport
         passport_issuer, passport_kid = None, None
 
         if not pkey_cache:
