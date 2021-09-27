@@ -300,6 +300,7 @@ class RASOauth2Client(Oauth2ClientBase):
         try:
             token_endpoint = self.get_value_from_discovery_doc("token_endpoint", "")
             token = self.get_access_token(user, token_endpoint, db_session)
+            flask.session["ras_access_token"] = token
             userinfo = self.get_userinfo(token)
             encoded_visas = self.get_encoded_visas_v11_userinfo(userinfo, pkey_cache)
 
