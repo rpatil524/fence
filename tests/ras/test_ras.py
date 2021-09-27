@@ -19,6 +19,28 @@ import tests.utils
 logger = get_logger(__name__, log_level="debug")
 
 
+import json
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def mock_arborist(mock_arborist_requests):
+    mock_arborist_requests()
+
+
+def test_userinfo_standard_claims_get(client, encoded_creds_jwt):
+
+    encoded_credentials_jwt = encoded_creds_jwt["jwt"]
+
+    resp = client.get(
+        "/user", headers={"Authorization": "Bearer " + encoded_credentials_jwt}
+    )
+    print(resp.json)
+    assert resp.json["sub"]
+    assert resp.json["name"]
+    assert resp.status_code == 200
+
+
 def add_test_user(db_session, username="admin_user", id="5678", is_admin=True):
     test_user = User(username=username, id=id, is_admin=is_admin)
     # id is part of primary key

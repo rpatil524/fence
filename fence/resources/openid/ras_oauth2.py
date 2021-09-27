@@ -158,6 +158,7 @@ class RASOauth2Client(Oauth2ClientBase):
             jwks_endpoint = self.get_value_from_discovery_doc("jwks_uri", "")
 
             token = self.get_token(token_endpoint, code)
+            flask.session["ras_access_token"] = token
             keys = self.get_jwt_keys(jwks_endpoint)
             userinfo = self.get_userinfo(token)
 
@@ -300,7 +301,6 @@ class RASOauth2Client(Oauth2ClientBase):
         try:
             token_endpoint = self.get_value_from_discovery_doc("token_endpoint", "")
             token = self.get_access_token(user, token_endpoint, db_session)
-            flask.session["ras_access_token"] = token
             userinfo = self.get_userinfo(token)
             encoded_visas = self.get_encoded_visas_v11_userinfo(userinfo, pkey_cache)
 

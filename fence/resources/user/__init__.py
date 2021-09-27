@@ -161,6 +161,10 @@ def get_user_info(current_session, username):
         if "ga4gh_passport_v1" in at_scopes:
             info["ga4gh_passport_v1"] = []
 
+    info["ras_userinfo"] = flask.current_app.ras_client.get_userinfo(
+        flask.session.get("ras_access_token")
+    )
+
     return info
 
 
