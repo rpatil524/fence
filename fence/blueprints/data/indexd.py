@@ -48,6 +48,12 @@ from . import multipart_upload
 from ...models import AssumeRoleCacheAWS
 from ...models import AssumeRoleCacheGCP
 
+from datadog import initialize, statsd
+
+options = {"statsd_host": "datadog-agent-cluster-agent.datadog", "statsd_port": 8125}
+
+initialize(**options)
+
 logger = get_logger(__name__)
 
 ACTION_DICT = {
@@ -683,6 +689,14 @@ class S3IndexedFileLocation(IndexedFileLocation):
                     .first()
                 )
                 if cache and cache.expires_at and cache.expires_at > expiry:
+                    try:
+                        statsd.increment(
+                            "planx.gen3.fence.presigned_url.cache_hit",
+                            tags={"protocol": "s3"},
+                        )
+                    except Exception as e:
+                        # We don't want Fence to fail on an API error
+                        logger.warn(f"Couldn't send metric to Datadog. details: {e}")
                     rv = dict(
                         aws_access_key_id=cache.aws_access_key_id,
                         aws_secret_access_key=cache.aws_secret_access_key,
