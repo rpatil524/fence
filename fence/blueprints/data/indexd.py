@@ -704,6 +704,14 @@ class S3IndexedFileLocation(IndexedFileLocation):
                     )
                     cls._assume_role_cache[role_arn] = rv, cache.expires_at
                     return rv
+                try:
+                    statsd.increment(
+                        "planx.gen3.fence.presigned_url.cache_miss",
+                        tags={"protocol": "s3"},
+                    )
+                except Exception as e:
+                    # We don't want Fence to fail on an API error
+                    logger.warn(f"Couldn't send metric to Datadog. details: {e}")
 
         # retrieve from AWS, with additional ASSUME_ROLE_CACHE_SECONDS buffer for cache
         boto = boto or flask.current_app.boto
