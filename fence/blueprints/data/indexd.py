@@ -43,6 +43,7 @@ from fence.resources.google.utils import (
     get_google_app_creds,
     give_service_account_billing_access_if_necessary,
 )
+from fence.resources.ga4gh.passports import get_gen3_user_ids_from_ga4gh_passports
 from fence.utils import get_valid_expiration_from_request
 from . import multipart_upload
 from ...models import AssumeRoleCacheAWS
@@ -77,9 +78,12 @@ def get_signed_url_for_file(
 
     user_ids_from_passports = None
     if ga4gh_passports:
-        user_ids_from_passports = get_gen3_user_ids_from_ga4gh_passports(
-            ga4gh_passports
-        )
+        if config["USE_GA4GH_PASSPORT"]:
+            user_ids_from_passports = get_gen3_user_ids_from_ga4gh_passports(
+                ga4gh_passports
+            )
+        else:
+            raise NotSupported("Passports for data acceses is not configured")
 
     # add the user details to `flask.g.audit_data` first, so they are
     # included in the audit log if `IndexedFile(file_id)` raises a 404
@@ -427,7 +431,7 @@ class IndexedFile(object):
             # don't check the authorization if the file is public
             # (downloading public files with no auth is fine)
             if not self.public_acl and not self.check_authorization(
-                action, user_ids_from_passports=user_ids_from_passports
+                action,
             ):
                 raise Unauthorized(
                     f"You don't have access permission on this file: {self.file_id}"
@@ -547,7 +551,7 @@ class IndexedFile(object):
         return "/open" in self.index_document.get("authz", [])
 
     @login_required({"data"})
-    def check_authorization(self, action, user_ids_from_passports=None):
+    def check_authorization(self, action):
         # if we have a data file upload without corresponding metadata, the record can
         # have just the `uploader` field and no ACLs. in this just check that the
         # current user's username matches the uploader field
@@ -562,29 +566,8 @@ class IndexedFile(object):
             )
             return self.index_document.get("uploader") == username
 
-        # handle multiple GA4GH passports as a means of authn/z
-        project_accesses = []
-        if user_ids_from_passports:
-            for user_id in user_ids_from_passports:
-                new_project_access = _get_project_access_for_user_id(user_id)
-                if new_project_access:
-                    project_accesses.append(new_project_access)
-
-        if not project_accesses:
-            # if we didn't get anything from passports, assume old JWT, get from flask context
-            project_accesses.append(flask.g.user.project_access)
-
-        has_access = False
-        for project_access in project_accesses:
-            given_acls = set(filter_auth_ids(action, project_access))
-            has_access = len(self.set_acls & given_acls) > 0
-
-            # if any of the project_access information results in a success,
-            # this user has access
-            if has_access:
-                break
-
-        return has_access
+        given_acls = set(filter_auth_ids(action, flask.g.user.project_access))
+        return len(self.set_acls & given_acls) > 0
 
     @login_required({"data"})
     def delete_files(self, urls=None, delete_all=True):
@@ -1472,8 +1455,3 @@ def filter_auth_ids(action, list_auth_ids):
         if checked_permission in values:
             authorized_dbgaps.append(key)
     return authorized_dbgaps
-
-
-def _get_project_access_for_user_id(user_id):
-    # TODO
-    return {}
