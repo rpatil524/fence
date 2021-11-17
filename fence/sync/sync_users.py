@@ -915,17 +915,27 @@ class UserSyncer(object):
             None
         """
 
+        print("------start upsert ---------------------")
+        print(user_info)
         for username in user_info:
+            print("----------query username--------------")
             u = query_for_user(session=sess, username=username)
+            print("----------done query username--------------")
+            print(u)
 
             if u is None:
+                print("------adding user ---------------------")
+
                 self.logger.info("create user {}".format(username))
                 u = User(username=username)
                 sess.add(u)
+                print("------added user ---------------------")
 
+            print(self.arborist_client)
             if self.arborist_client:
                 self.arborist_client.create_user({"name": username})
 
+            print("---------post arborist----------------")
             u.email = user_info[username].get("email", "")
             u.display_name = user_info[username].get("display_name", "")
             u.phone_number = user_info[username].get("phone_number", "")
@@ -951,6 +961,8 @@ class UserSyncer(object):
                 if not found:
                     tag = Tag(key=k, value=v)
                     u.tags.append(tag)
+        print("------end upsert ---------------------")
+        
 
     def _revoke_from_storage(self, to_delete, sess, google_bulk_mapping=None):
         """

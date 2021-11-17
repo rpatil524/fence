@@ -158,7 +158,6 @@ def get_unvalidated_visas_from_valid_passport(passport, pkey_cache=None):
         return []
 
     public_key = pkey_cache.get(passport_issuer, {}).get(passport_kid)
-
     try:
         decoded_passport = validate_jwt(
             encoded_token=passport,
@@ -173,7 +172,6 @@ def get_unvalidated_visas_from_valid_passport(passport, pkey_cache=None):
                 "verify_aud": False,
             },
         )
-
         if "sub" not in decoded_passport:
             raise JWTError("Visa is missing the 'sub' claim.")
     except Exception as e:

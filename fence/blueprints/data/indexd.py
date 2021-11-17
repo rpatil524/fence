@@ -4,6 +4,9 @@ import json
 from urllib.parse import urlparse, ParseResult, urlunparse
 
 from datetime import datetime, timedelta
+from sqlalchemy.dialects.postgresql.array import array
+
+from sqlalchemy.sql.functions import user
 
 from cached_property import cached_property
 import cirrus
@@ -436,11 +439,11 @@ class IndexedFile(object):
         if action is not None and action not in SUPPORTED_ACTIONS:
             raise NotSupported("action {} is not supported".format(action))
         return self._get_signed_url(
-            protocol, action, expires_in, force_signed_url, r_pays_project, file_name
+            protocol, action, expires_in, force_signed_url, r_pays_project, file_name, user_ids_from_passports,
         )
 
     def _get_signed_url(
-        self, protocol, action, expires_in, force_signed_url, r_pays_project, file_name
+        self, protocol, action, expires_in, force_signed_url, r_pays_project, file_name, user_ids_from_passports=None
     ):
         if action == "upload":
             # NOTE: self.index_document ensures the GUID exists in indexd and raises
@@ -475,6 +478,7 @@ class IndexedFile(object):
                     public_data=self.public,
                     force_signed_url=force_signed_url,
                     r_pays_project=r_pays_project,
+                    user_ids_from_passports=user_ids_from_passports,
                 )
 
         raise NotFound(
@@ -1050,10 +1054,10 @@ class GoogleStorageIndexedFileLocation(IndexedFileLocation):
         public_data=False,
         force_signed_url=True,
         r_pays_project=None,
+        user_ids_from_passports=None,
     ):
         resource_path = self.get_resource_path()
-
-        user_info = _get_user_info()
+        user_info = _get_user_info(user_ids_from_passports=user_ids_from_passports)
 
         if public_data and not force_signed_url:
             url = "https://storage.cloud.google.com/" + resource_path
@@ -1428,13 +1432,20 @@ class AzureBlobStorageIndexedFileLocation(IndexedFileLocation):
             return ("Failed to delete data file.", status_code)
 
 
-def _get_user_info(sub_type=str):
+def _get_user_info(sub_type=str, user_ids_from_passports=None):
     """
     Attempt to parse the request for token to authenticate the user. fallback to
     populated information about an anonymous user.
     By default, cast `sub` to str. Use `sub_type` to override this behavior.
     """
     # TODO Update to support POSTed passport
+    if user_ids_from_passports:
+        # if sub maps to username then get user_id from table
+        # else use just sub that maps to user_id
+        for user_id in user_ids_from_passports:
+            print(user_id)
+
+
     try:
         set_current_token(
             validate_request(scope={"user"}, audience=config.get("BASE_URL"))
