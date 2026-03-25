@@ -375,11 +375,11 @@ def reactivate_soft_deleted_user(current_session, username):
     Reverts the soft-remove done by soft_delete_user above
     by marking user as active=True.
     """
-    logger.debug(f"Reactivate soft-deleted user '{username}'")
     usr = us.get_user(current_session, username)
     if (usr.active):
         raise UserError(("Error: user is already active"))
 
+    logger.debug(f"Reactivate soft-deleted user '{username}'")
     usr.active = True
     current_session.commit()
     return us.get_user_info(current_session, usr.username)
