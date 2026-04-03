@@ -988,12 +988,15 @@ class S3IndexedFileLocation(IndexedFileLocation):
         Return:
             Optional[str]: bucket name or None if not in config
         """
-
         s3_buckets = get_value(
             flask.current_app.config,
             "S3_BUCKETS",
             InternalError("S3_BUCKETS not configured"),
         )
+        explicit_match = self.parsed_url.netloc
+        if explicit_match in s3_buckets:
+            return explicit_match
+
         for bucket in s3_buckets:
             if re.match("^" + bucket + "$", self.parsed_url.netloc):
                 return bucket
